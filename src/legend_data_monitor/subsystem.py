@@ -24,17 +24,19 @@ class Subsystem:
     dataset=
         dict with the following keys:
             - 'experiment' [str]: 'L60' or 'L200'
-            - 'path' [str]: < move description here from get_data() >
-            - 'version' [str]: < move description here from get_data() >
+            - 'path' [str]: path to prod-ref folder (before version)
+            - 'version' [str]: version of pygama data processing format vXX.XX
+            - 'period' [str]: period in format pXX
             - 'type' [str]: 'phy' or 'cal'
             - the following key(s) depending in time selection
                 1) 'start' : <start datetime>, 'end': <end datetime> where <datetime> input is of format 'YYYY-MM-DD hh:mm:ss'
                 2) 'window'[str]: time window in the past from current time point, format: 'Xd Xh Xm' for days, hours, minutes
                 2) 'timestamps': str or list of str in format 'YYYYMMDDThhmmssZ'
                 3) 'runs': int or list of ints for run number(s)  e.g. 10 for r010
-    Or input kwargs separately path=, version=, type=; start=&end=, or window=, or timestamps=, or runs=
+    Or input kwargs separately experiment=, path=, version=, period=, type=; start=&end=, or window=, or timestamps=, or runs=
 
     Experiment is needed to know which channel belongs to the pulser Subsystem, AUX0 (L60) or AUX1 (L200)
+    Period is needed to know the name of the FlashCam channel variable (fcid or rawid)
     Selection range is needed for the channel map and status information at that time point, and should be the only information needed,
         however, pylegendmeta only allows query .on(timestamp=...) but not .on(run=...);
         therefore, to be able to get info in case of `runs` selection, we need to know
@@ -98,7 +100,12 @@ class Subsystem:
             )
             utils.logger.error("\033[91m%s\033[0m", self.__doc__)
             return
-
+        
+        if "period" not in data_info:
+            utils.logger.error('\033[91mProvide period!\033[0m')
+            utils.logger.error("\033[91m%s\033[0m", self.__doc__)
+            return
+        
         # in p03 things change again!!!!
         # There is no version in '/data2/public/prodenv/prod-blind/tmp/auto/generated/tier/dsp/phy/p03', so for the moment we skip this check...
         if data_info["period"] != "p03" and not os.path.exists(

@@ -72,6 +72,11 @@
         "variation": [null, null],
         "absolute": [null, null]
       }
+    },
+    "range": {
+      "geds": {
+        "absolute": [null, 100]
+      }
     }
   },
   "A_max": {

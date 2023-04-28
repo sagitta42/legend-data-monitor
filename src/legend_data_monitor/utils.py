@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import shelve
+import sys
 
 # for getting DataLoader time range
 from datetime import datetime, timedelta
@@ -451,7 +452,7 @@ def get_run_name(config, user_time_range: dict) -> str:
         logger.error(
             "\033[91mThe selected timestamps were not find anywhere. Try again with another time range!\033[0m"
         )
-        exit()
+        sys.exit()
     if len(run_list) > 1:
         return get_multiple_run_id(user_time_range)
 
@@ -526,14 +527,14 @@ def add_config_entries(
             type = config["dataset"]["type"]
         else:
             logger.error("\033[91mYou need to provide data type! Try again.\033[0m")
-            exit()
+            sys.exit()
         if "path" in config["dataset"].keys():
             path = config["dataset"]["path"]
         else:
             logger.error(
                 "\033[91mYou need to provide path to lh5 files! Try again.\033[0m"
             )
-            exit()
+            sys.exit()
     else:
         # get phy/cal lists
         phy_keys = [key for key in keys if "phy" in key]
@@ -585,7 +586,7 @@ def add_config_entries(
             '\033[91mThere are missing entries among ["output", "dataset", "saving", "subsystems"] in the config file (found keys: %s). Try again and check you start with "output" and "dataset" info!\033[0m',
             config.keys(),
         )
-        exit()
+        sys.exit()
 
     return config
 

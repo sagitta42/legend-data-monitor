@@ -138,20 +138,9 @@ def plot_histo(
     data_channel: DataFrame, fig: Figure, ax: Axes, plot_info: dict, color=None
 ):
     # --- histo range
-    # !! in the future take from par-settings
-    # needed for cuspEmax because with geant outliers not possible to view normal histo
-    hrange = {"keV": [0, 2500]}
     # take full range if not specified
-    x_min = (
-        hrange[plot_info["unit"]][0]
-        if plot_info["unit"] in hrange
-        else data_channel[plot_info["parameter"]].min()
-    )
-    x_max = (
-        hrange[plot_info["unit"]][1]
-        if plot_info["unit"] in hrange
-        else data_channel[plot_info["parameter"]].max()
-    )
+    x_min = plot_info["range"][0] if plot_info["range"][0] else data_channel[plot_info["parameter"]].min()
+    x_max = plot_info["range"][1] if plot_info["range"][1] else data_channel[plot_info["parameter"]].max()
 
     # --- bin width
     bwidth = {"keV": 2.5}
@@ -164,6 +153,7 @@ def plot_histo(
             if plot_info["unit_label"] == "%"
             else np.arange(x_min, x_max + bin_width, bin_width)
         )
+    # bin_width is never zero? unless is somehow zero in par-settings.json but why would it be?
     else:
         bin_edges = 50
 
@@ -185,7 +175,7 @@ def plot_histo(
         if plot_info["unit_label"] == "%"
         else f"{plot_info['label']} [{plot_info['unit_label']}]"
     )
-    fig.supylabel(x_label)
+    fig.supxlabel(x_label)
 
     # saving x,y data into output files
     ch_dict = {
