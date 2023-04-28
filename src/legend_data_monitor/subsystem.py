@@ -100,12 +100,12 @@ class Subsystem:
             )
             utils.logger.error("\033[91m%s\033[0m", self.__doc__)
             return
-        
+
         if "period" not in data_info:
-            utils.logger.error('\033[91mProvide period!\033[0m')
+            utils.logger.error("\033[91mProvide period!\033[0m")
             utils.logger.error("\033[91m%s\033[0m", self.__doc__)
             return
-        
+
         # in p03 things change again!!!!
         # There is no version in '/data2/public/prodenv/prod-blind/tmp/auto/generated/tier/dsp/phy/p03', so for the moment we skip this check...
         if data_info["period"] != "p03" and not os.path.exists(

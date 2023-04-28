@@ -122,9 +122,17 @@ def make_subsystem_plots(
         }
 
         # plotting range (if provided)
-        rng = utils.PLOT_INFO[plot_settings["parameters"]]["range"][subsystem.type] if ("range" in utils.PLOT_INFO[plot_settings["parameters"]] and subsystem.type in utils.PLOT_INFO[plot_settings["parameters"]]["range"]) else None
+        rng = (
+            utils.PLOT_INFO[plot_settings["parameters"]]["range"][subsystem.type]
+            if (
+                "range" in utils.PLOT_INFO[plot_settings["parameters"]]
+                and subsystem.type
+                in utils.PLOT_INFO[plot_settings["parameters"]]["range"]
+            )
+            else None
+        )
         var = "variation" if plot_settings["variation"] else "absolute"
-        plot_info["range"] = rng[var] if (rng and var in rng) else [None,None]
+        plot_info["range"] = rng[var] if (rng and var in rng) else [None, None]
 
         # information for having the resampled or all entries (needed only for 'vs time' style option)
         plot_info["resampled"] = (

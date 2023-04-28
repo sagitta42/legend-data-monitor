@@ -139,8 +139,16 @@ def plot_histo(
 ):
     # --- histo range
     # take full range if not specified
-    x_min = plot_info["range"][0] if plot_info["range"][0] else data_channel[plot_info["parameter"]].min()
-    x_max = plot_info["range"][1] if plot_info["range"][1] else data_channel[plot_info["parameter"]].max()
+    x_min = (
+        plot_info["range"][0]
+        if plot_info["range"][0]
+        else data_channel[plot_info["parameter"]].min()
+    )
+    x_max = (
+        plot_info["range"][1]
+        if plot_info["range"][1]
+        else data_channel[plot_info["parameter"]].max()
+    )
 
     # --- bin width
     bwidth = {"keV": 2.5}
