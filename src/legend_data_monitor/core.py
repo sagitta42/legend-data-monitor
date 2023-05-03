@@ -150,7 +150,7 @@ def generate_plots(config: dict, plt_path: str):
     # some output messages, just to warn the user...
     if saving is None:
         utils.logger.warning(
-            "\033[93mData will not be saed, but the pdf will be.\033[0m"
+            "\033[93mData will not be saved, but the pdf will be.\033[0m"
         )
     elif saving == "append":
         utils.logger.warning(

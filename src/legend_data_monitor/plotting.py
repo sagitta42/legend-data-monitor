@@ -53,6 +53,9 @@ def make_subsystem_plots(
         # same, here need to account for unit label %
         if "variation" not in plot_settings:
             plot_settings["variation"] = False
+        # range for parameter
+        if "range" not in plot_settings:
+            plot_settings["range"] = [None, None]
         # add saving info + plot where we save things
         plot_settings["saving"] = saving
         plot_settings["plt_path"] = plt_path
@@ -121,19 +124,6 @@ def make_subsystem_plots(
             "plot_style": plot_settings["plot_style"],
         }
 
-        # plotting range (if provided)
-        rng = (
-            utils.PLOT_INFO[plot_settings["parameters"]]["range"][subsystem.type]
-            if (
-                "range" in utils.PLOT_INFO[plot_settings["parameters"]]
-                and subsystem.type
-                in utils.PLOT_INFO[plot_settings["parameters"]]["range"]
-            )
-            else None
-        )
-        var = "variation" if plot_settings["variation"] else "absolute"
-        plot_info["range"] = rng[var] if (rng and var in rng) else [None, None]
-
         # information for having the resampled or all entries (needed only for 'vs time' style option)
         plot_info["resampled"] = (
             plot_settings["resampled"] if "resampled" in plot_settings else ""
@@ -177,6 +167,7 @@ def make_subsystem_plots(
             else plot_settings["parameters"]
         )  # could be multiple in the future!
         plot_info["param_mean"] = plot_settings["parameters"] + "_mean"
+        plot_info["range"] = plot_settings["range"]
 
         # -------------------------------------------------------------------------
         # call chosen plot structure
@@ -469,13 +460,12 @@ def plot_per_string(data_analysis: DataFrame, plot_info: dict, pdf: PdfPages):
     # put it in the table
     data_analysis = data_analysis.set_index("channel")
     data_analysis["label"] = labels["label"]
-    data_analysis = data_analysis.sort_values("label")
 
     # -------------------------------------------------------------------------------
     # plot
     # -------------------------------------------------------------------------------
 
-    data_analysis = data_analysis.sort_values(["location", "label"])
+    data_analysis = data_analysis.sort_values(["location", "position"])
     # new subplot for each string
     ax_idx = 0
     for location, data_location in data_analysis.groupby("location"):
@@ -493,9 +483,11 @@ def plot_per_string(data_analysis: DataFrame, plot_info: dict, pdf: PdfPages):
         # new color for each channel
         col_idx = 0
         labels = []
-        for label, data_channel in data_location.groupby("label"):
-            _ = plot_style(data_channel, fig, axes[ax_idx], plot_info, COLORS[col_idx])
-            labels.append(label)
+        # groupby "label" will sort in alphabetical order (1, 10, 11, 2, 3, ...) -> group by position
+        for _, data_channel in data_location.groupby("position"):
+            plot_style(data_channel, fig, axes[ax_idx], plot_info, COLORS[col_idx])
+            # label is the same for all entries for the same channel
+            labels.append(data_channel["label"].iloc[0])
             col_idx += 1
 
         # add grid
@@ -552,22 +544,9 @@ def plot_array(data_analysis: DataFrame, plot_info: dict, pdf: PdfPages):
     )
 
     # -------------------------------------------------------------------------------
-    # create label of format hardcoded for geds sX-pX-chXXX-name
-    # -------------------------------------------------------------------------------
-    labels = data_analysis.groupby("channel").first()[["name", "location", "position"]]
-    labels["channel"] = labels.index
-    labels["label"] = labels[["location", "position", "channel", "name"]].apply(
-        lambda x: f"p{x[1]}-ch{str(x[2])}-{x[3]}", axis=1
-    )
-    # put it in the table
-    data_analysis = data_analysis.set_index("channel")
-    data_analysis["label"] = labels["label"]
-    data_analysis = data_analysis.sort_values("label")
-
-    # -------------------------------------------------------------------------------
     # plot
     # -------------------------------------------------------------------------------
-    data_analysis = data_analysis.sort_values(["location", "label"])
+    data_analysis = data_analysis.sort_values(["location", "position"])
 
     # one color for each string
     col_idx = 0
@@ -589,14 +568,14 @@ def plot_array(data_analysis: DataFrame, plot_info: dict, pdf: PdfPages):
         values_per_string = []  # y values - in each string
         channels_per_string = []  # x values - in each string
         # group by channel
-        for label, data_channel in data_location.groupby("label"):
+        for position, data_channel in data_location.groupby("position"):
             plot_style(data_channel, fig, axes, plot_info, COLORS[col_idx])
 
             map_dict = utils.MAP_DICT
             location = data_channel["location"].unique()[0]
-            position = data_channel["position"].unique()[0]
 
-            labels.append(label.split("-")[-1])
+            # same detector for all dataframe since one channel
+            labels.append(data_channel["name"].iloc[0])
             channels.append(map_dict[str(location)][str(position)])
             values_per_string.append(data_channel[plot_info["parameter"]].unique()[0])
             channels_per_string.append(map_dict[str(location)][str(position)])
@@ -721,9 +700,8 @@ def plot_per_barrel_and_position(
     # put it in the table
     data_analysis = data_analysis.set_index("channel")
     data_analysis["label"] = labels["label"]
-    data_analysis = data_analysis.sort_values("label")
 
-    data_analysis = data_analysis.sort_values(["location", "label"])
+    data_analysis = data_analysis.sort_values(["location", "position"])
 
     # separate figure for each barrel ("location"= IB, OB)...
     for location, data_location in data_analysis.groupby("location"):

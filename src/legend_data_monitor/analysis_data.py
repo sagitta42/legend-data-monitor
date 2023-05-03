@@ -287,6 +287,8 @@ class AnalysisData:
                 self.data = self.data.rename(
                     columns={utils.SPECIAL_PARAMETERS[param][0]: "K_events"}
                 )
+            elif param == "AoE_Custom":
+                self.data["AoE_Custom"] = self.data["A_max"] / self.data["cuspEmax"]
 
     def channel_mean(self):
         """

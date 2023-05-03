@@ -10,6 +10,8 @@ import numpy as np
 import seaborn as sns
 from matplotlib.backends.backend_pdf import PdfPages
 from pandas import DataFrame, Timedelta, concat
+from tabulate import tabulate
+
 
 from . import utils
 
@@ -208,7 +210,6 @@ def status_plot(subsystem, data_analysis: DataFrame, plot_info: dict, pdf: PdfPa
         output_result = output_result.replace(0.0, "\033[94m\u2713\033[0m")
         # convert to dataframe (to use 'tabulate' library)
         df = DataFrame(output_result.to_records())
-        from tabulate import tabulate
 
         output_result = tabulate(
             df, headers="keys", tablefmt="psql", showindex=False, stralign="center"

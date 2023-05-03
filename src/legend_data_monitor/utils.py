@@ -283,13 +283,13 @@ def check_plot_settings(conf: dict):
                     )
                     return False
 
-            # if vs time was provided, need time window
+            # if vs time was provided, or status plot, need time window
             if (
-                plot_settings["plot_style"] == "vs time"
+                (plot_settings["plot_style"] == "vs time" or ("status" in plot_settings and plot_settings["status"]))
                 and "time_window" not in plot_settings
             ):
                 logger.error(
-                    "\033[91mYou chose plot style 'vs time' and did not provide 'time_window'!\033[0m"
+                    "\033[91mYou chose plot style 'vs time' or required a 'status' plot and did not provide 'time_window'!\033[0m"
                 )
                 return False
 
@@ -414,8 +414,14 @@ def get_run_name(config, user_time_range: dict) -> str:
     )
 
     # start/end timestamps of the selected time range of interest
-    start_timestamp = user_time_range["timestamp"]["start"]
-    end_timestamp = user_time_range["timestamp"]["end"]
+    # if range was given, will have keywords "start" and "end"
+    if "start" in user_time_range["timestamp"]:
+        start_timestamp = user_time_range["timestamp"]["start"]
+        end_timestamp = user_time_range["timestamp"]["end"]
+    # if list of timestamps was given (may be not consecutive or in order), it's just a list
+    else:
+        start_timestamp = min(user_time_range["timestamp"])
+        end_timestamp = max(user_time_range["timestamp"])
 
     run_list = []  # this will be updated with the run ID
 

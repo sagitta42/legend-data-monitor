@@ -75,6 +75,12 @@ def plot_vs_time(
     # beautification
     # -------------------------------------------------------------------------
 
+    # set range if provided
+    if plot_info["range"][0] is not None:
+        ax.set_ylim(ymin=plot_info["range"][0])
+    if plot_info["range"][1] is not None:
+        ax.set_ylim(ymax=plot_info["range"][1])        
+
     # --- time ticks/labels on x-axis
     min_x = date2num(data_channel.iloc[0]["datetime"])
     max_x = date2num(data_channel.iloc[-1]["datetime"])
@@ -141,12 +147,12 @@ def plot_histo(
     # take full range if not specified
     x_min = (
         plot_info["range"][0]
-        if plot_info["range"][0]
+        if plot_info["range"][0] is not None
         else data_channel[plot_info["parameter"]].min()
     )
     x_max = (
         plot_info["range"][1]
-        if plot_info["range"][1]
+        if plot_info["range"][1] is not None
         else data_channel[plot_info["parameter"]].max()
     )
 
@@ -155,26 +161,28 @@ def plot_histo(
     bin_width = bwidth[plot_info["unit"]] if plot_info["unit"] in bwidth else 1
 
     # Compute number of bins
-    if bin_width:
-        bin_edges = (
-            np.arange(x_min, x_max + bin_width, bin_width / 5)
-            if plot_info["unit_label"] == "%"
-            else np.arange(x_min, x_max + bin_width, bin_width)
-        )
-    # bin_width is never zero? unless is somehow zero in par-settings.json but why would it be?
-    else:
-        bin_edges = 50
+    # sometimes e.g. A/E is always 0.0 => mean = 0 => var = NaN => x_min = NaN => cannot do np.arange
+    if not np.isnan(x_min):
+        if bin_width:
+            bin_edges = (
+                np.arange(x_min, x_max + bin_width, bin_width / 5)
+                if plot_info["unit_label"] == "%"
+                else np.arange(x_min, x_max + bin_width, bin_width)
+            )
+        # this never happens unless somebody puts 0 in the bwidth dictionary?
+        else:
+            bin_edges = 50
 
-    # -------------------------------------------------------------------------
-    # Plot histogram
-    data_channel[plot_info["parameter"]].plot.hist(
-        bins=bin_edges,
-        range=[x_min, x_max],
-        histtype="step",
-        linewidth=1.5,
-        ax=ax,
-        color=color,
-    )
+        # -------------------------------------------------------------------------
+        # Plot histogram
+        data_channel[plot_info["parameter"]].plot.hist(
+            bins=bin_edges,
+            range=[x_min, x_max],
+            histtype="step",
+            linewidth=1.5,
+            ax=ax,
+            color=color,
+        )
 
     # -------------------------------------------------------------------------
     ax.set_yscale("log")

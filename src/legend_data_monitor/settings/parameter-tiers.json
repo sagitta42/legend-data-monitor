@@ -4,5 +4,7 @@
   "timestamp": "dsp",
   "cuspEmax_ctc_cal": "hit",
   "AoE_Corrected": "hit",
-  "zacEmax_ctc_cal": "hit"
+  "zacEmax_ctc_cal": "hit",
+  "A_max": "dsp",
+  "cuspEmax": "dsp"
 }
